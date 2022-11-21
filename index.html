@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous">
+
+    </script>
+    <style>
+        .chat-container{
+            display:flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgb(255,255,255);
+            margin: 10px;
+        }
+
+        .chat-box{
+            width: 80%;
+            height: 90vh;
+            background-color: aliceblue;
+            display: flex;
+            flex-direction: column;
+           
+        }
+
+        .right{
+            float: right;
+            margin-right: 50px;
+        }
+
+        .left{
+            float: left;
+            margin-left: 10px;
+        }
+
+        .chat_message{
+            width:25%;
+            height: 30px;
+            background-color: #009dff;
+            border-radius: 30px;
+            margin-bottom: 15px;
+            padding:10px 20px;
+            color: aliceblue;
+        }
+        .but{
+            background-color: #009dff;
+            border-radius: 30px;
+            color: aliceblue;
+            border-color: #009dff;
+        }
+       
+    </style>
+</head>
+<body>
+    
+    <div class="chat-container">
+        <div class="chat-box"></div>
+        <div class="chat-submit">
+            <input id="message" type="text" placeholder="Text Here..." />
+            <button class="but" onclick="sendMessageTotheServer()">Submit</button>
+        </div>
+        
+
+    </div>
+</body>
+<script>
+    var sender_id = Date.now() /1000 |0;
+    const ws = new WebSocket('ws://localhost:8080');
+    ws.addEventListener("open",()=>{
+        console.log('we are connected...');
+    });
+
+    ws.addEventListener('message',function(event){ 
+        var data = JSON.parse(event.data);
+        if(sender_id !== data.sender_id) {
+            var message_html = `<div class = "chat_message left">`+ data.message +`</div>`;
+        $('.chat-box').append(message_html);
+        }
+    });
+
+    function sendMessageTotheServer(){
+        var message = $('#message').val();
+        var message_html = `<div class = "chat_message right">`+message+`</div>`;
+        $('.chat-box').append(message_html);
+        var json_data= {sender_id:sender_id, message:message};
+        ws.send(JSON.stringify(json_data));
+    }
+
+</script>
+</html>
